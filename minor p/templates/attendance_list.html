@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Records | Attendify_AI</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: url('{{ url_for("static", filename="classroom_ai.png") }}') no-repeat center fixed;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 20px;
+      padding: 30px 40px;
+      width: 85%;
+      max-width: 1000px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      color: #fff;
+      text-align: center;
+    }
+
+    h2 {
+      color: #00ffff;
+      font-weight: 600;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #44bd32;
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .back-btn {
+      margin-top: 20px;
+      display: inline-block;
+      background-color: #273c75;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background-color: #40739e;
+    }
+
+    footer {
+      margin-top: 15px;
+      font-size: 0.9em;
+      color: #aaa;
+    }
+
+    footer a {
+      color: #00ffff;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🕒 Attendance Records</h2>
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>Roll</th>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Time</th>
+      </tr>
+      {% for record in records %}
+      <tr>
+        <td>{{ record[0] }}</td>
+        <td>{{ record[1] }}</td>
+        <td>{{ record[2] }}</td>
+        <td>{{ record[3] }}</td>
+        <td>{{ record[4] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <a href="/" class="back-btn">⬅️ Back to Home</a>
+    <footer>
+      © 2025 <a href="#">Attendify_AI</a> | Smart Attendance Management System
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h6>Total Students</h6>
+      <h3>{{ total_students }}</h3>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h6>Present Today</h6>
+      <h3>{{ present_today }}</h3>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h6>Export</h6>
+      <a class="btn btn-outline-primary me-2" href="{{ url_for('attendance.attendance_export', fmt='csv') }}">CSV</a>
+      <a class="btn btn-outline-success" href="{{ url_for('attendance.attendance_export', fmt='xlsx') }}">XLSX</a>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-lg-8">
+    <div class="card p-3">
+      <h5>Attendance Overview</h5>
+      <canvas id="attendanceChart" style="width:100%; height:300px;"></canvas>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card p-3">
+      <h5>Recent Attendance</h5>
+      <ul class="list-group">
+        {% for r in recent %}
+          <li class="list-group-item">{{ r[3] }} {{ r[4] }} — {{ r[2] }} ({{ r[1] }})</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const total = {{ total_students }};
+  const present = {{ present_today }};
+  const absent = Math.max(0, total - present);
+
+  const ctx = document.getElementById('attendanceChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Present Today', 'Absent'],
+      datasets: [{
+        data: [present, absent],
+        hoverOffset: 4
+      }]
+    },
+    options: { responsive: true }
+  });
+</script>
+{% endblock %}

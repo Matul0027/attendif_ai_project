@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Student</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #979cb1;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #886d6d;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      width: 400px;
+      text-align: center;
+    }
+    h2 {
+      color: #273c75;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #afb4c5;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #44bd32;
+      color: white;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #4cd137;
+    }
+    .back {
+      margin-top: 10px;
+      display: inline-block;
+      color: #0097e6;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>➕ Add Student</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <p style="color:
+            {% if category == 'success' %}#44bd32
+            {% elif category == 'danger' %}#e84118
+            {% else %}#fbc531{% endif %};">
+            {{ message }}
+          </p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+      <input type="text" name="name" placeholder="Full Name" required>
+      <input type="text" name="roll" placeholder="Roll Number" required>
+      <input type="text" name="class_name" placeholder="Class" required>
+      <input type="text" name="section" placeholder="Section" required>
+      <button type="submit">Add Student</button>
+    </form>
+    <a href="/students" class="back">⬅ Back to Student List</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">📸 Real-time Attendance with Bounding Boxes</h2>
+
+<div class="row g-3">
+  <div class="col-md-8">
+    <div class="position-relative" style="width:100%; max-width:700px;">
+      <video id="video" autoplay playsinline style="width:100%; border-radius:8px; background:#000;"></video>
+      <canvas id="overlay" class="position-absolute top-0 start-0" style="pointer-events:none;"></canvas>
+    </div>
+
+    <div class="mt-3 d-flex gap-2">
+      <button id="startBtn" class="btn btn-primary">Start Scanning</button>
+      <button id="stopBtn" class="btn btn-secondary" disabled>Stop</button>
+      <span id="status" class="ms-3 align-self-center text-muted">Idle</span>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h5>Recognized Faces</h5>
+      <ul id="recognizedList" class="list-group mb-3"></ul>
+      <h6>Log</h6>
+      <div id="logBox" style="max-height:300px; overflow:auto; font-size:0.9rem;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function(){
+  const video = document.getElementById('video');
+  const overlay = document.getElementById('overlay');
+  const ctxOverlay = overlay.getContext('2d');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const status = document.getElementById('status');
+  const recognizedList = document.getElementById('recognizedList');
+  const logBox = document.getElementById('logBox');
+  const seen = new Map();
+
+  let stream = null, scanning = false, intervalId = null;
+
+  function log(msg) {
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logBox.prepend(p);
+  }
+
+  async function startCamera() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+      video.srcObject = stream;
+      await new Promise(res => video.onloadedmetadata = res);
+      overlay.width = video.videoWidth;
+      overlay.height = video.videoHeight;
+    } catch (err) {
+      alert('Camera access error: ' + err);
+      console.error(err);
+    }
+  }
+
+  function stopCamera() {
+    if (!stream) return;
+    stream.getTracks().forEach(t => t.stop());
+    video.srcObject = null;
+    stream = null;
+  }
+
+  function drawBoxes(faces) {
+    ctxOverlay.clearRect(0, 0, overlay.width, overlay.height);
+    faces.forEach(face => {
+      const [x1, y1, x2, y2] = face.box;
+      const color = face.roll ? "#00ff00" : "#ff0000";
+      ctxOverlay.strokeStyle = color;
+      ctxOverlay.lineWidth = 2;
+      ctxOverlay.strokeRect(x1, y1, x2 - x1, y2 - y1);
+      ctxOverlay.font = "16px Arial";
+      ctxOverlay.fillStyle = color;
+      ctxOverlay.fillText(face.name, x1 + 4, y1 - 6);
+    });
+  }
+
+  async function sendFrame() {
+    const canvasTmp = document.createElement('canvas');
+    const w = 320;
+    const h = Math.round(video.videoHeight * (320 / video.videoWidth));
+    canvasTmp.width = w; canvasTmp.height = h;
+    const ctx = canvasTmp.getContext('2d');
+    ctx.drawImage(video, 0, 0, w, h);
+    const dataUrl = canvasTmp.toDataURL('image/jpeg', 0.7);
+
+    try {
+      const res = await fetch('/scan/frame', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: dataUrl })
+      });
+      const j = await res.json();
+      if (j.error) {
+        if (j.error !== null) log("⚠️ " + j.error);
+        return;
+      }
+
+      if (j.matches && j.matches.length > 0) {
+        drawBoxes(j.matches);
+        for (const m of j.matches) {
+          if (!m.roll) continue; // skip unknown
+          const key = m.roll;
+          const now = Date.now();
+          const prev = seen.get(key);
+          if (!prev || now - prev.lastSeen > 4000) {
+            seen.set(key, {name: m.name, lastSeen: now});
+            const li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.textContent = `${m.name} (${m.roll}) — ${m.marked ? 'Marked' : 'Already marked'}`;
+            recognizedList.prepend(li);
+            log(`${m.name} (${m.roll}) detected`);
+          }
+        }
+      } else {
+        ctxOverlay.clearRect(0, 0, overlay.width, overlay.height);
+      }
+
+    } catch (err) {
+      log("Request failed: " + err);
+    }
+  }
+
+  startBtn.addEventListener('click', async () => {
+    await startCamera();
+    scanning = true;
+    status.textContent = "Scanning...";
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    sendFrame();
+    intervalId = setInterval(sendFrame, 1500);
+  });
+
+  stopBtn.addEventListener('click', () => {
+    scanning = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    status.textContent = "Stopped";
+    clearInterval(intervalId);
+    stopCamera();
+    ctxOverlay.clearRect(0, 0, overlay.width, overlay.height);
+  });
+
+  await startCamera();
+})();
+</script>
+{% endblock %}

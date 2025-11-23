@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enroll | Attendif_AI</title>
+  <style>
+    :root {
+      --primary: #273c75;
+      --accent: #00a8ff;
+      --green: #4cd137;
+      --bg-blur: rgba(255, 255, 255, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: url('{{ url_for("static", filename="classroom_bg.png") }}') no-repeat center center fixed;
+      background-size: cover;
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #2f3640;
+    }
+
+    .enroll-box {
+      background: var(--bg-blur);
+      backdrop-filter: blur(15px);
+      padding: 40px 45px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      width: 400px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .enroll-box h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      font-size: 15px;
+      color: #2f3640;
+      background: rgba(255,255,255,0.9);
+    }
+
+    video, canvas, img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      margin: 15px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 12px 22px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      color: white;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .btn-capture {
+      background: var(--accent);
+    }
+    .btn-capture:hover {
+      background: #0097e6;
+      transform: translateY(-2px);
+    }
+
+    .btn-submit {
+      background: var(--green);
+    }
+    .btn-submit:hover {
+      background: #44bd32;
+      transform: translateY(-2px);
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 18px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 15px;
+      opacity: 0.9;
+    }
+    .back-btn:hover {
+      text-decoration: underline;
+      opacity: 1;
+    }
+
+    /* Flash messages */
+    .flash {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="enroll-box">
+    <h2>📋 Enroll Student</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form id="enrollForm" method="POST">
+      <input type="text" name="name" placeholder="Full Name" required>
+      <input type="text" name="roll" placeholder="Roll Number" required>
+      <input type="text" name="class_name" placeholder="Class" required>
+      <input type="text" name="section" placeholder="Section" required>
+
+      <!-- Camera Section -->
+      <video id="video" autoplay></video>
+      <canvas id="canvas" style="display: none;"></canvas>
+      <input type="hidden" name="image_data" id="image_data">
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-capture" id="captureBtn">📸 Capture</button>
+        <button type="submit" class="btn btn-submit">✅ Submit</button>
+      </div>
+    </form>
+
+    <a href="/" class="back-btn">⬅ Back to Home</a>
+  </div>
+
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const imageInput = document.getElementById("image_data");
+    const captureBtn = document.getElementById("captureBtn");
+
+    // Access camera
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      video.srcObject = stream;
+    });
+
+    // Capture image
+    captureBtn.addEventListener("click", () => {
+      const context = canvas.getContext("2d");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      imageInput.value = canvas.toDataURL("image/jpeg");
+      alert("📷 Image captured successfully!");
+    });
+  </script>
+
+</body>
+</html>
+      <h3 href="/about">About</h3>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <h1>Welcome to Attendif_AI</h1>
+    <h2>Your Smart Attendance Management System Using AI-powered Facial Recognition.</h2>
+    <div class="btn-group">
+      <h2 href="/enroll" class="btn btn-primary">Enroll Student</h2>
+      <h2 href="/attendance" class="btn btn-green">Mark Attendance</h2>
+      <h2 href="/about" class="btn btn-outline">Learn More</h2>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2025 Attendif_AI. All rights reserved.
+  </footer>
+
+  <style>
+    .container {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    p {
+      font-size: 18px;

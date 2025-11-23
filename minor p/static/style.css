@@ -1,0 +1,27 @@
+/* static/style.css */
+body {
+  font-family: "Poppins", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background-color: #f8f9fa;
+}
+
+/* Slightly rounded tables */
+table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Navbar brand */
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Cards and tables shadow */
+.card, .table {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* smaller flashed messages */
+.alert {
+  font-size: 0.95rem;
+}
